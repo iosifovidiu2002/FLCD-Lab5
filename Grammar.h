@@ -10,7 +10,7 @@ std::vector<std::string> str_split(std::string toSplit, int max_split = INT32_MA
     std::vector<std::string> splitted;
     while(i < toSplit.size() && toSplit[i] == ' ') i++;
     int idx = i;
-    for(; i < toSplit.size() && splitted.size() < max_split + 1; i++) {
+    for(; i < toSplit.size() && splitted.size() < max_split; i++) {
         if(toSplit[i] == ' ') {
             int str_size = i - idx;
             splitted.push_back(toSplit.substr(idx, str_size));
@@ -19,7 +19,7 @@ std::vector<std::string> str_split(std::string toSplit, int max_split = INT32_MA
         }
     }
     if(idx < toSplit.size()) {
-        int str_size = i - idx;
+        int str_size = toSplit.size() - idx;
         splitted.push_back(toSplit.substr(idx, str_size));
     }
     return splitted;
