@@ -8,6 +8,7 @@
 class Grammar {
 public:
     Grammar() = default;
+
     void read_grammar(std::string file_path) {
         std::ifstream file;
 
@@ -17,7 +18,21 @@ public:
             std::cout << e.what() << '\n';
         }
 
-        std::string line; 
+        std::string line;
+
+        // Read all non termials
+        std::getline(file, line);
+        
+        // Read all termials
+        std::getline(file, line);
+
+        // Read starting non terminal
+        std::getline(file, line);
+
+        for(std::string line; std::getline(file, line);){
+            // Process current production
+        }
+
     }
 private:
     std::unordered_set<std::string> terminals;
