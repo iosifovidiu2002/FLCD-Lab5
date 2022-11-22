@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <vector>
 #include <string>
 #include <unordered_set>
 
@@ -8,5 +10,7 @@ public:
         
     }
 private:
-    
+    std::unordered_set<std::string> terminals;
+    std::unordered_set<std::string> nonTerminals;
+    std::unordered_map<std::string, std::vector<std::vector<std::string>>> productions;
 };
