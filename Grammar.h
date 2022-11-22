@@ -30,8 +30,6 @@ class Grammar {
 public:
     Grammar() = default;
 
-    std::vector<std::string> str_split(std::string toSplit, int maxSplit = INT_MAX);
-
     void read_grammar(std::string file_path) {
         std::ifstream file;
 
@@ -59,7 +57,7 @@ public:
 
         while(std::getline(file, line)){
             // Process current production
-            auto prod_split = str_split(line, 3);
+            auto prod_split = str_split(line, 2);
             auto lhs = prod_split[0];
             if(productions.find(lhs) == productions.end()){
                 productions[lhs] = {};
@@ -74,6 +72,16 @@ public:
                 } else{
                     current_production_value.push_back(c);
                 }
+            }
+        }
+
+        for(auto pair : productions){
+            for (auto prod : pair.second){
+                std::string full_prod = "";
+                for(auto t: prod){
+                    full_prod += t;
+                }
+                std::cout << pair.first << "->" << full_prod << "\n";
             }
         }
 
