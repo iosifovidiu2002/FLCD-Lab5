@@ -63,8 +63,8 @@ public:
             // Process current production
             auto prod_split = str_split(line, 2);
             auto lhs = prod_split[0];
-            if(nonTerminals.find(lhs) != nonTerminals.end()){
-                throw std::runtime_error("CFG check failed!");
+            if(nonTerminals.find(lhs) == nonTerminals.end()){
+                throw std::runtime_error("CFG check ");
             }
             if(productions.find(lhs) == productions.end()){
                 productions[lhs] = {};
