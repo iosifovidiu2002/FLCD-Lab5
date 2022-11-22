@@ -30,6 +30,10 @@ class Grammar {
 public:
     Grammar() = default;
 
+    std::unordered_map<std::string, std::vector<std::vector<std::string>>> get_productions(){
+        return productions;
+    }
+
     void read_grammar(std::string file_path) {
         std::ifstream file;
 
@@ -59,6 +63,9 @@ public:
             // Process current production
             auto prod_split = str_split(line, 2);
             auto lhs = prod_split[0];
+            if(nonTerminals.find(lhs) != nonTerminals.end()){
+                throw std::runtime_error("CFG check failed!");
+            }
             if(productions.find(lhs) == productions.end()){
                 productions[lhs] = {};
             }
@@ -73,19 +80,10 @@ public:
                     current_production_value.push_back(c);
                 }
             }
+            productions[lhs].push_back(current_production_value);
         }
-
-        for(auto pair : productions){
-            for (auto prod : pair.second){
-                std::string full_prod = "";
-                for(auto t: prod){
-                    full_prod += t;
-                }
-                std::cout << pair.first << "->" << full_prod << "\n";
-            }
-        }
-
     }
+
 private:
     std::string startNT;
     std::unordered_set<std::string> terminals;
