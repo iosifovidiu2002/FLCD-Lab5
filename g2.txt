@@ -1,5 +1,6 @@
 program statement_list statement simple_statement structure_statement assume_statement repeat_statement parse_statement expression bool_expression int_expression declaration final_assign_declaration var_assign_declaration assign type atom_type array_type array_access io_statement boolean
 func main ( ) : zilch { } \n assume otherwise repeat parse and or < > <= >= == != + - / * % var final = int bool char [ ] read write identifier constant
+program
 program -> func main ( ) : zilch { statement_list }
 statement_list -> statement | statement \n statement_list
 statement -> simple_statement | structure_statement

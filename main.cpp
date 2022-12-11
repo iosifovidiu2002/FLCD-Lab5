@@ -2,7 +2,7 @@
 
 int main(){
     Grammar g = Grammar();
-    g.read_grammar("lr0.txt");
+    g.read_grammar("g2.txt");
 
     for(auto pair : g.get_productions()){
         for (auto prod : pair.second){

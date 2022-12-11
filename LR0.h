@@ -48,8 +48,15 @@ void print(LR0State &state) {
 }
 
 bool state_exists_in(LR0States &states, LR0State &to_check) {
+    print(to_check);
     for(auto &state: states) {
-        if(std::is_permutation(state.begin(), state.end(), to_check.begin())) return true;
+        if(state.size() != to_check.size()) {
+            continue;
+        }
+        if(std::is_permutation(state.begin(), state.end(), to_check.begin())) 
+        {
+            return true;
+        }
     }
     return false;
 }
@@ -109,8 +116,12 @@ public:
                 auto state = C[solved_idx];
                 for(auto symbol: symbols) {
                     auto new_state = go_to(state, symbol);
-                    if(new_state.size() <= 0) continue;
-                    if(state_exists_in(C, new_state)) continue;
+                    if(new_state.size() <= 0) {
+                        continue;
+                    }
+                    if(state_exists_in(C, new_state)) {
+                        continue;
+                    }
                     C.push_back(new_state);
                 }
             }
