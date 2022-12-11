@@ -53,7 +53,7 @@ public:
         // Read all termials
         std::getline(file, line);
         auto terminals = str_split(line);
-        std::copy(terminals.begin(),terminals.end(),std::inserter(terminals, terminals.end()));
+        std::copy(terminals.begin(),terminals.end(),std::inserter(this->terminals, this->terminals.end()));
 
         // Read starting non terminal
         std::getline(file, line);
@@ -82,6 +82,28 @@ public:
             }
             productions[lhs].push_back(current_production_value);
         }
+    }
+
+    std::string getStartNT() {
+        return startNT;
+    }
+
+    bool isNonTerminal(std::string elem) {
+        return nonTerminals.find(elem) != nonTerminals.end();
+    }
+
+    std::vector<std::vector<std::string>> productions_for(std::string nonTerminal) {
+        return productions[nonTerminal];
+    };
+
+    std::unordered_set<std::string> get_symbols() {
+        std::unordered_set<std::string> result;
+        std::set_union(
+                terminals.begin(), terminals.end(),
+                nonTerminals.begin(), nonTerminals.end(),
+                std::inserter(result, result.begin())
+                );
+        return result;
     }
 
 private:
