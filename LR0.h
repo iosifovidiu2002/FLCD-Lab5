@@ -61,9 +61,69 @@ bool state_exists_in(LR0States &states, LR0State &to_check) {
     return false;
 }
 
+enum ActionType {shift, reduce, accept, error};
+
+std::ostream& operator<<(std::ostream& os, const ActionType type)
+{
+  switch(type)
+  {
+    case ActionType::shift:
+        os << "Shift";
+        break;
+    case ActionType::reduce:
+        os << "Reduce";
+        break;
+    case ActionType::accept:
+        os << "Accept";
+        break;
+    case ActionType::error:
+        os << "Error";
+        break;
+  }
+  return os;
+}
+
+class Action{
+public:
+    ActionType type;
+    std::string start_symbol;
+    int position;
+    Action(){}
+    Action(ActionType _type, int _position=0, std::string _start_symbol=""): type(_type), position(_position), start_symbol(_start_symbol){}
+};
+
 class LR0 {
 public:
     LR0(Grammar &grammar): _grammar(grammar) {}
+
+    std::unordered_map<int, Action> generate_actions(){
+        std::unordered_map<int, Action> actions;
+        auto states = col_can();
+        for(int i = 0; i < states.size(); i++){
+            auto state = states[i];
+            for(auto production : state){
+                if(production.right.size() != 0){
+                    actions[i] = Action(ActionType::shift);
+                } else if(production.start_symbol != "S'"){
+                    auto possible_productions = _grammar.get_productions()[production.start_symbol];
+                    for(int i = 0; i < possible_productions.size(); i++){
+                        auto possible_production_rhs = possible_productions[i];
+                        if(possible_production_rhs.size() == production.left.size() && std::equal(possible_production_rhs.begin(), possible_production_rhs.end() , production.left.begin())){
+                            break;
+                        }
+                    }
+                    actions[i] = Action(ActionType::reduce, i, production.start_symbol);
+                }
+
+                if(production.start_symbol == "S'" && production.left.size() == 1 && production.left[0] == _grammar.startNT){
+                    actions[i] = Action(ActionType::accept);
+                }
+
+            }
+        }
+
+        return actions;
+    } 
 
     LR0State closure(LR0State startItem) {
         LR0State C = startItem;

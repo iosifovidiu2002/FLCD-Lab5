@@ -16,9 +16,12 @@ int main(){
 
    LR0 lr0(g); 
 
+   auto actions = lr0.generate_actions();
    auto states = lr0.col_can();
 
-   for(auto &state:states) {
-       print(state);
+   for(auto action : actions){
+    std::cout << "State:\n";
+    print(states[action.first]);
+    std::cout << "Action: " << action.second.type << "\n";
    }
 }
