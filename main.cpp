@@ -18,13 +18,6 @@ int main(){
 
    auto states = lr0.col_can();
    auto actions = lr0.generate_actions(states);
-   
-//    for(auto action : actions){
-//     if(action.second.type == ActionType::reduce){
-//         assert(action.second.start_symbol != "");
-//         std::cout << action.second.start_symbol << " " << action.second.position << "\n";
-//     }
-//    }
 
     auto output = lr0.parse_input({"$", "c", "b", "b", "a"});
 
