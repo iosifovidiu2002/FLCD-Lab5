@@ -2,7 +2,7 @@
 
 int main(){
     Grammar g = Grammar();
-    g.read_grammar("g2.txt");
+    g.read_grammar("lr0.txt");
 
     for(auto pair : g.get_productions()){
         for (auto prod : pair.second){
@@ -14,14 +14,26 @@ int main(){
         }
     }    
 
-   LR0 lr0(g); 
+   LR0 lr0(g);
 
-   auto actions = lr0.generate_actions();
    auto states = lr0.col_can();
+   auto actions = lr0.generate_actions(states);
+   
+//    for(auto action : actions){
+//     if(action.second.type == ActionType::reduce){
+//         assert(action.second.start_symbol != "");
+//         std::cout << action.second.start_symbol << " " << action.second.position << "\n";
+//     }
+//    }
 
-   for(auto action : actions){
-    std::cout << "State:\n";
-    print(states[action.first]);
-    std::cout << "Action: " << action.second.type << "\n";
-   }
+    auto output = lr0.parse_input({"$", "c", "b", "b", "a"});
+
+    for(auto prod : output){
+        std::cout << prod.first << " -> ";
+        for(auto c : prod.second){
+            std::cout << c << " ";
+        }
+        std::cout << "\n";
+    }
+
 }

@@ -106,6 +106,10 @@ public:
         return result;
     }
 
+    std::string get_start_symbol(){
+        return startNT;
+    }
+
 private:
     std::string startNT;
     std::unordered_set<std::string> terminals;

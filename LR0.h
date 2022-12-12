@@ -1,5 +1,6 @@
 #include "Grammar.h"
 #include <iostream>
+#include <cassert>
 
 struct LR0Item {
     std::string start_symbol;
@@ -48,7 +49,7 @@ void print(LR0State &state) {
 }
 
 bool state_exists_in(LR0States &states, LR0State &to_check) {
-    print(to_check);
+    //print(to_check);
     for(auto &state: states) {
         if(state.size() != to_check.size()) {
             continue;
@@ -92,13 +93,19 @@ public:
     Action(ActionType _type, int _position=0, std::string _start_symbol=""): type(_type), position(_position), start_symbol(_start_symbol){}
 };
 
+class A{
+public:
+    int b;
+    A(){}
+    A(int _b) : b(_b){}
+};
+
 class LR0 {
 public:
     LR0(Grammar &grammar): _grammar(grammar) {}
 
-    std::unordered_map<int, Action> generate_actions(){
+    std::unordered_map<int, Action> generate_actions(LR0States& states){
         std::unordered_map<int, Action> actions;
-        auto states = col_can();
         for(int i = 0; i < states.size(); i++){
             auto state = states[i];
             for(auto production : state){
@@ -106,24 +113,92 @@ public:
                     actions[i] = Action(ActionType::shift);
                 } else if(production.start_symbol != "S'"){
                     auto possible_productions = _grammar.get_productions()[production.start_symbol];
-                    for(int i = 0; i < possible_productions.size(); i++){
-                        auto possible_production_rhs = possible_productions[i];
+                    int j;
+                    for(j = 0; j < possible_productions.size(); j++){
+                        auto possible_production_rhs = possible_productions[j];
                         if(possible_production_rhs.size() == production.left.size() && std::equal(possible_production_rhs.begin(), possible_production_rhs.end() , production.left.begin())){
                             break;
                         }
                     }
-                    actions[i] = Action(ActionType::reduce, i, production.start_symbol);
+                    actions[i] = Action(ActionType::reduce, j, production.start_symbol);
                 }
-
-                if(production.start_symbol == "S'" && production.left.size() == 1 && production.left[0] == _grammar.startNT){
+                if(production.start_symbol == "S'" && production.left.size() == 1 && production.left[0] == _grammar.get_start_symbol()){
                     actions[i] = Action(ActionType::accept);
                 }
-
             }
         }
 
         return actions;
     } 
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> parse_input(std::vector<std::string> input_stack){
+        auto states = col_can();
+        std::vector<std::pair<std::string, std::vector<std::string>>> output_band;
+        std::vector<std::string> work_stack_alphabet;
+        work_stack_alphabet.push_back("$");
+        std::vector<LR0State> work_stack_states;
+        work_stack_states.push_back(states[0]);
+
+        auto actions = generate_actions(states);
+        assert(states.size() == actions.size());
+
+        for(int i=0; i<actions.size(); i++) {
+            if(actions.find(i) == actions.end()) {
+                std::cout << "muie calinb\n";
+            }
+        }
+
+        LR0State current_state = states[0];
+        Action curr_state_action = get_action(work_stack_states[work_stack_states.size()-1], actions, states);
+        while(curr_state_action.type != ActionType::accept && curr_state_action.type != ActionType::error){
+            switch(curr_state_action.type){
+                case ActionType::shift: {
+                    auto ai = input_stack[input_stack.size()-1];
+                    auto sm = work_stack_states[work_stack_states.size()-1];
+                    auto sj = go_to(sm, ai);
+                    work_stack_alphabet.push_back(ai);
+                    work_stack_states.push_back(sj);
+                    input_stack.pop_back();
+                    break;
+                }
+                case ActionType::reduce:{
+                    
+                    std::pair<std::string, std::vector<std::string>> corresponding_production = {curr_state_action.start_symbol, _grammar.get_productions()[curr_state_action.start_symbol][curr_state_action.position]};
+                    
+                    for(int i = corresponding_production.second.size()-1; i >=0; i--){
+                        auto corresponding_production_alphabet = corresponding_production.second[i];
+                        if(corresponding_production_alphabet != work_stack_alphabet[work_stack_alphabet.size()-1]){
+                            throw std::runtime_error("Reduce error");
+                        }
+                        work_stack_alphabet.pop_back();
+                        work_stack_states.pop_back();
+                    }
+
+                    work_stack_alphabet.push_back(corresponding_production.first);
+                    work_stack_states.push_back(go_to(work_stack_states[work_stack_states.size() - 1], corresponding_production.first));
+
+                    output_band.push_back(corresponding_production);
+
+                    break;
+                }
+            }
+            
+            curr_state_action = get_action(work_stack_states[work_stack_states.size()-1], actions, states);
+        }
+
+        return output_band;
+    }
+
+    Action get_action(LR0State state, std::unordered_map<int, Action>& actions, LR0States states){
+        for(int i = 0; i < states.size(); i++){
+            auto curr_state = states[i];
+            if(state.size() == curr_state.size() && std::equal(state.begin(), state.end(), curr_state.begin())){
+                return actions[i];
+            }
+        }
+
+        return Action(ActionType::error);
+    }
 
     LR0State closure(LR0State startItem) {
         LR0State C = startItem;
