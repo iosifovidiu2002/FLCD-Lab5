@@ -1,6 +1,7 @@
 #include "Grammar.h"
 #include <iostream>
 #include <cassert>
+#include <queue>
 
 struct LR0Item {
     std::string start_symbol;
@@ -100,9 +101,62 @@ public:
     A(int _b) : b(_b){}
 };
 
+struct TableField {
+    int index;
+    std::string info;
+    int parent;
+    int left_sibling;
+    TableField(int _index, std::string _info, int _parent=0, int _left_siblig=0):
+    index(_index),
+    info(_info),
+    parent(_parent),
+    left_sibling(_left_siblig){}
+};
+
+typedef std::vector<TableField> Table;
+
+void print(TableField &field) {
+    std::cout << field.index << " || " << field.info << " || " << field.parent << " || " << field.left_sibling << '\n';
+}
+
+void print(Table &table) {
+    for(auto &row: table) {
+        print(row);
+    }
+}
+
 class LR0 {
 public:
     LR0(Grammar &grammar): _grammar(grammar) {}
+
+    Table to_table(std::vector<std::pair<std::string, std::vector<std::string>>> &output) {
+        Table result;
+        int index = 0;
+        std::queue<int> indexes;
+        int parent_index = 0;
+        for(auto &prod: output) {
+            if(indexes.empty()) {
+                index++;
+                std::string info = prod.first;
+                result.push_back(TableField(index, info));
+                parent_index = index;
+            } else {
+                parent_index = indexes.front();
+                indexes.pop();
+            }
+            int left_sibling = 0;
+            for(int i=0; i<prod.second.size(); i++) {
+                std::string info = prod.second[i];
+                index++;
+                if(_grammar.isNonTerminal(info)) {
+                    indexes.push(index);
+                }
+                result.push_back(TableField(index, info, parent_index, left_sibling));
+                left_sibling = index;
+            }
+        }
+        return result;
+    }
 
     std::unordered_map<int, Action> generate_actions(LR0States& states){
         std::unordered_map<int, Action> actions;

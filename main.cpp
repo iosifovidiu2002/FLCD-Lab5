@@ -14,10 +14,10 @@ int main(){
         }
     }    
 
-   LR0 lr0(g);
+    LR0 lr0(g);
 
-   auto states = lr0.col_can();
-   auto actions = lr0.generate_actions(states);
+    auto states = lr0.col_can();
+    auto actions = lr0.generate_actions(states);
 
     auto output = lr0.parse_input({"$", "c", "b", "b", "a"});
 
@@ -27,6 +27,10 @@ int main(){
             std::cout << c << " ";
         }
         std::cout << "\n";
-    }
+    } 
 
+    std::reverse(output.begin(), output.end());
+    auto table = lr0.to_table(output);
+
+    print(table);
 }
