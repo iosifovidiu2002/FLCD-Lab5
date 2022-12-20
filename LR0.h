@@ -108,24 +108,29 @@ public:
         std::unordered_map<int, Action> actions;
         for(int i = 0; i < states.size(); i++){
             auto state = states[i];
+            int reduce_nr = 0;
+            int shift_nr = 0;
             for(auto production : state){
                 if(production.right.size() != 0){
                     actions[i] = Action(ActionType::shift);
-                } else if(production.start_symbol != "S'"){
+                    shift_nr = 1;
+                }
+                if(production.start_symbol != "S'"){
                     auto possible_productions = _grammar.get_productions()[production.start_symbol];
                     int j;
                     for(j = 0; j < possible_productions.size(); j++){
                         auto possible_production_rhs = possible_productions[j];
                         if(possible_production_rhs.size() == production.left.size() && std::equal(possible_production_rhs.begin(), possible_production_rhs.end() , production.left.begin())){
-                            break;
+                            reduce_nr++;
+                            actions[i] = Action(ActionType::reduce, j, production.start_symbol);
                         }
                     }
-                    actions[i] = Action(ActionType::reduce, j, production.start_symbol);
                 }
                 if(production.start_symbol == "S'" && production.left.size() == 1 && production.left[0] == _grammar.get_start_symbol()){
                     actions[i] = Action(ActionType::accept);
                 }
             }
+            if(shift_nr + reduce_nr >= 2) throw std::runtime_error("Conflict");
         }
 
         return actions;
